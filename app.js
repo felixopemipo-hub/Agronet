@@ -49,13 +49,33 @@ function route(){
   head();
 }
 
+
+function imageFor(p){
+ const n=(p.name||'').toLowerCase();
+ if(/tomato/.test(n)) return 'https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=900&q=85';
+ if(/yam/.test(n)) return 'https://images.unsplash.com/photo-1518977676601-b53f82aba655?auto=format&fit=crop&w=900&q=85';
+ if(/ugu|leaf|vegetable/.test(n)) return 'https://images.unsplash.com/photo-1576045057995-568f588f82fb?auto=format&fit=crop&w=900&q=85';
+ if(/egusi|melon/.test(n)) return 'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=900&q=85';
+ return 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=85';
+}
+
 function home(){
   const L=S.ports.filter(p=>p.kind==='produce'&&p.on).map(p=>({p,d:km(here(),usr(p.seller))})).sort((a,b)=>a.d-b.d).slice(0,5);
-  $('#app').innerHTML=`<section class=hero><div><h1>Buy and sell farm produce from people near you.</h1>
-  <p>List your harvest, reserve what you need, and walk to the seller. Need a tractor mechanic or a vet? Hire one from the same map.</p>
-  <p><a class=btn href="#market">Browse the market</a> <a class="btn" style="background:var(--maize);color:var(--ink)" href="#register">Create an account</a></p></div>
-  <div class=board><h3>Nearest to you today</h3>${L.map(x=>`<div><span>${esc(x.p.name)}</span><span>${N(x.p.price)}/${esc(x.p.unit)} · ${x.d.toFixed(1)} km</span></div>`).join('')}</div></section>
-  <h2>Everything in one place</h2><p><b>Market</b> for produce, <b>Hire</b> for labour, equipment and advice, and <b>Complaints</b> to reach the right agency.</p>`;
+  $('#app').innerHTML=`<section class="hero hero-banner"><div class="hero-copy"><span class="eyebrow">GROW • CONNECT • THRIVE</span><h1>Your farm. Your market. Your Agronet.</h1>
+  <p>Discover fresh produce from nearby farmers, connect with trusted farm-service providers, and grow your agricultural business in one place.</p>
+  <div class="hero-actions"><a class="btn" href="#market">Explore the market →</a><a class="btn btn-light" href="#sell">Start selling</a></div>
+  <div class="hero-proof"><span>🌱 Local farmers</span><span>📍 Nearby listings</span><span>🤝 Direct connections</span></div></div>
+  <div class="hero-photo"><img src="assets/agronet-farmer-banner.png" alt="Nigerian farmer holding fresh vegetables in a green farm"></div></section>
+  <section class="welcome-strip"><div><span class="strip-icon">🌾</span><span><b>Made for the people who grow our food</b><small>Bringing farmers, buyers and farm professionals closer.</small></span></div><a href="#register">Join Agronet →</a></section>
+  <section class="home-section"><div class="section-heading"><span class="eyebrow">DISCOVER AGRONET</span><h2>Everything agriculture, connected.</h2><p>Find what you need to keep your farm and business moving.</p></div>
+  <div class="feature-grid">
+   <a class="feature-card" href="#market"><img src="https://images.unsplash.com/photo-1546094096-0df4bcaaa337?auto=format&fit=crop&w=1000&q=85" alt="Fresh ripe tomatoes"><span class="feature-shade"></span><span class="feature-content"><small>BUY & SELL</small><b>Fresh from the farm</b><span>Explore the market →</span></span></a>
+   <a class="feature-card" href="#hire"><img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=85" alt="Farm fields"><span class="feature-shade"></span><span class="feature-content"><small>FARM SERVICES</small><b>Get the right help</b><span>Find skilled professionals →</span></span></a>
+   <a class="feature-card" href="#sell"><img src="https://images.unsplash.com/photo-1592982537447-6f2a6a0a6f48?auto=format&fit=crop&w=1000&q=85" alt="Harvested farm produce"><span class="feature-shade"></span><span class="feature-content"><small>YOUR BUSINESS</small><b>Put your harvest out there</b><span>Create a listing →</span></span></a>
+  </div></section>
+  <section class="nearby-section"><div class="nearby-head"><div><span class="eyebrow">AROUND YOU</span><h2>Nearby farm produce</h2><p>Explore available produce closest to your location.</p></div><a href="#market" class="text-link">View all listings →</a></div>
+  <div class="nearby-list">${L.map(x=>`<a class="nearby-item" href="#market"><span class="nearby-emoji">${esc(x.p.emoji||'🌾')}</span><span><b>${esc(x.p.name)}</b><small>${x.d.toFixed(1)} km away</small></span><strong>${N(x.p.price)}<small> / ${esc(x.p.unit)}</small></strong></a>`).join('')||'<p class=empty>No nearby listings yet. Visit the market to explore.</p>'}</div></section>
+  <section class="cta-banner"><div><span class="eyebrow">BE PART OF THE NETWORK</span><h2>Have something to grow, sell or offer?</h2><p>Join the Agronet community and connect directly with people around you.</p><a class="btn btn-light" href="#register">Get started today →</a></div></section>`;
 }
 
 /* ---------- Registration ---------- */
@@ -107,7 +127,7 @@ function results(){
 }
 function card(p,d){
   const s=usr(p.seller),pend=S.orders.filter(o=>o.port===p.id&&o.status==='pending'),q=pq(p),svc=p.kind==='service';
-  return `<article class=card>${p.img?`<img src="${p.img}" alt="${esc(p.name)}">`:`<div class=ph aria-hidden=true>${p.emoji||'🌾'}</div>`}<div class=cb>
+  return `<article class=card>${p.img?`<img src="${p.img}" alt="${esc(p.name)}">`:`<img src="${imageFor(p)}" alt="${esc(p.name)}" loading="lazy">`}<div class=cb>
   <h3>${esc(p.name)}</h3><p class=sub>${esc(s.name)} ${badge(s)} · ${d.toFixed(1)} km</p>
   <p><b>${N(p.price)}</b> per ${esc(p.unit)}</p><p>${p.qty} ${esc(p.unit)} ${svc?'available':'in stock'}${q?` · ${q} pending`:''}</p>
   ${pend.length?`<ul class=pend>${pend.map(o=>`<li>${o.qty} ${esc(p.unit)} pending until ${new Date(o.deadline).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</li>`).join('')}</ul>`:''}
